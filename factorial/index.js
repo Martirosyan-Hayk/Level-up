@@ -6,7 +6,6 @@ function factorial(n) {
 }
 
 function factorialCache(n) {
-    console.log('factorialCache');
     if (n === 0) {
       return 1;
     }
