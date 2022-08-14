@@ -54,10 +54,10 @@ namespace types {
         }
 
         addEqual(lhs: BigInt): BigInt {
-            // if (!lhs.positive){
-            //     this.subEqual(lhs);
-            //     return this;
-            // }
+            if (!lhs.positive){
+                this.subEqual(lhs);
+                return this;
+            }
 
             let value: string = '';
             let sum = 0;
@@ -102,8 +102,99 @@ namespace types {
             return this;
         }
 
-        // // sub(lhs: BigInt): BigInt {}
-        // subEqual(lhs: BigInt): BigInt {}
+        sub(lhs: BigInt): BigInt {
+            let tmp: BigInt = new BigInt(this);
+            tmp.subEqual(lhs);
+        
+            return tmp;
+        }
+
+        subEqual(lhs: BigInt) {
+            let bigger: BigInt = this;
+            let smaller: BigInt = lhs;
+
+            if (this.valueInString.length === lhs.valueInString.length) {
+                if (!this.positive && lhs.positive) {
+                    bigger = lhs;
+                    smaller = this;
+                } else if (this.positive && lhs.positive) {
+                    if (parseInt(this.valueInString[0], 10) < parseInt(lhs.valueInString[0], 10)) {
+                        bigger = lhs;
+                        smaller = this;
+                    }
+                } else if (!this.positive && !lhs.positive) {
+                    if (parseInt(this.valueInString[0], 10) < parseInt(lhs.valueInString[0], 10)) {
+                        bigger = lhs;
+                        smaller = this;
+                    }
+                }
+            } else if (this.valueInString.length < lhs.valueInString.length && lhs.positive) {
+                bigger = lhs;
+                smaller = this;
+            }
+
+            let value: string = '';
+            let biggerIndex = bigger.valueInString.length - 1;
+            let smallerIndex = smaller.valueInString.length - 1;
+
+            while (biggerIndex >= 0 && smallerIndex >= 0) {
+                let biggerValue = parseInt(bigger.valueInString[biggerIndex], 10);
+                let smallerValue = parseInt(smaller.valueInString[smallerIndex], 10);
+                if(biggerValue < smallerValue) {
+                    let count = 0;
+                    let i = biggerIndex - 1;
+                    while (i >= 0) {
+                        if (bigger.valueInString[i] === '0') {
+                            ++count;
+                        } else {
+                            ++count;
+                            break;
+                        }
+                        --i;
+                    }
+                    let tmp = parseInt(this.valueInString[biggerIndex - count], 10);
+                    
+                        let tmpValue = '';
+                        for (let i = 0; i <  bigger.valueInString.length; ++i) {
+                            if (i != biggerIndex - count) {
+                                tmpValue += bigger.valueInString[i];
+                            } else {
+                                tmp -= 1;
+                                if (tmp && i != 0) {
+                                    tmpValue += tmp.toString();
+                                }
+                                ++i;
+                                while(count > 0) {
+                                    let tmp2 = parseInt(this.valueInString[i], 10);
+                                    tmpValue += tmp2 ? (tmp2 - 1).toString() : '9';
+                                    --count;
+                                    ++i;
+                                }
+                            }
+                        }
+                        value += tmpValue.split('').reverse().join('');
+                        --biggerIndex;
+                        --smallerIndex;
+                } else {
+                    value += (biggerValue - smallerValue).toString();
+                    --biggerIndex;
+                    --smallerIndex;
+                }
+            }
+
+            while(biggerIndex >= 0 || smallerIndex >= 0) {
+                if (biggerIndex >= 0) {
+                    value += bigger.valueInString[biggerIndex--];
+                } else {
+                    value += smaller.valueInString[smallerIndex--];
+                }
+            }
+
+
+            this.valueInString = value.split('').reverse().join('');
+
+            return this;
+        }
 
         print(): void {
             if(!this.positive) {
@@ -126,28 +217,15 @@ namespace types {
            return max;
         }
 
-        private toArrayOfNumber(value: string): number[] {
-
-            let array: number[] = [];
-            let arrayOfStringValues = value.match(/.{1,5}/g);
-
-            if (arrayOfStringValues && arrayOfStringValues.length > 1) {
-                arrayOfStringValues.forEach(element => {
-                    array.push(parseInt(element));
-                });
-            }
-
-            return array;
-        }
-
     }
 }
 
-let a = new types.BigInt(100);
-let b = new types.BigInt(12);
+let a = new types.BigInt(99);
+let b = new types.BigInt(11);
 
-// a.print();
-// b.print();
-const c = a.add(b);
-a.print()
+a.print();
+b.print();
+const c = a.sub(b);
+a.subEqual(b)
+a.print();
 c.print();
